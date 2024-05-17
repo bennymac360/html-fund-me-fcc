@@ -5,6 +5,7 @@
 
 // FOUND THE FRONT END VERSION OF ethers AND CREATED THE FILE "./ethers-6.7.0.esm.min.js", WHICH IS ethers IN FRONT END
 import { ethers } from "./ethers-6.7.0.esm.min.js"
+import { abi, contractAddress } from "./constants.js"
 
 // DEFINE CONNECT BUTTON
 const connectButton = document.getElementById("connectButton")
@@ -39,21 +40,35 @@ async function connect() {
 
 // fund fucntion
 async function fund(ethAmount) {
+    ethAmount = "1"
     console.log(`Funding with amount ${ethAmount}...`)
     if (typeof window.ethereum !== "undefined") {
-        try {
-            // provider / connection to the block chain
-            // signer / wallet / someone with gas
-            // contract in which we interact
-            // ABI & addresses
+        // provider / connection to the block chain
+        // signer / wallet / someone with gas
+        // contract in which we interact
+        // ABI & addresses
 
-            // from the brower window we can obtain the ethereum object,
-            // which contains our rpc provider, it then passes that through ethers to be our "provider"
-            const provider = new ethers.BrowserProvider(window.ethereum)
-        } catch (error) {
-            console.log("error")
-        }
-    } else {
+        // from the brower window we can obtain the ethereum object,
+        // which contains our rpc provider, it then passes that through ethers to be our "provider"
+        const provider = new ethers.BrowserProvider(window.ethereum) // the provier is our meta mask
+        await provider.send("eth_requestAccounts", [])
+        const signer = provider.getSigner(0) // if we are connected with account-1 it will allocate that as our signer.
+        const signerAddress = (await signer).getAddress()
+        console.log("signerAddress is:")
+        console.log(signerAddress)
+        console.log("------------")
+
+        console.log("signer is:")
+        console.log(signer)
+        console.log("------------")
+        const contract = new ethers.Contract(
+            contractAddress,
+            abi,
+            signerAddress
+        )
+        const transactionResponse = await contract.fund({
+            value: ethers.parseEther(ethAmount),
+        })
     }
 }
 
